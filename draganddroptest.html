@@ -1,0 +1,91 @@
+<html>
+<head>
+<style>
+.draggable {
+  cursor: grab;
+}
+
+.draggable:active{
+	cursor: grabbing;
+}
+</style>
+
+    <script type='text/javascript'>
+
+		let mousedown = false;
+		let mousedowninitial = false;
+		let draggedobject = false;
+		var translationvector = false;
+		var initialtranslationvector = [0,0];
+
+		
+		function getTranslation(ele){
+			//gets list of all transformations
+			transformslist = ele.transform.baseVal;
+			for (i = 0; i < transformslist.numberOfItems; i++){
+				//if the type of the transformation is a translation, get info
+				if (transformslist.getItem(i).type == 2) {
+					// e and f are the translation coords
+					xtranslate = transformslist.getItem(i).matrix.e;
+					ytranslate = transformslist.getItem(i).matrix.f;
+					}		
+				}	
+				return [xtranslate,ytranslate];
+			
+			}
+		
+		function thisIsDragged(ele){
+			if (draggedobject != ele){
+				console.log("new object");
+				draggedobject = ele;
+				}
+			}
+					
+		function dragEvent(){
+							
+			if (mousedown == true){
+				if (draggedobject){		
+//				console.log("spoons");
+				//initialtranslationvector = getTranslation(ele);
+				
+				translationvector = [initialtranslationvector[0]+event.clientX-mousedowninitial[0], event.clientY-mousedowninitial[1]+initialtranslationvector[1]];
+				translationcommand = "translate("+translationvector[0]+","+translationvector[1]+")";
+				draggedobject.setAttribute("transform",translationcommand);
+
+					}
+				}
+			}
+					
+			function mouseDownEvent(){
+				mousedown = true;
+				initialtranslationvector = getTranslation(draggedobject);
+				mousedowninitial = [event.clientX, event.clientY]
+				document.getElementById("mouseupdowndiv").innerHTML="mouse down";
+					}
+					
+			function mouseUpEvent() {
+				mousedown = false;
+				document.getElementById("mouseupdowndiv").innerHTML="mouse up";
+				
+					}
+					
+	</script>
+</head>
+<body>
+	<svg width="500" height="300" id="space" onmousedown="mouseDownEvent()", onmouseup="mouseUpEvent()", onmousemove="dragEvent()", onmouseleave="mouseUpEvent()">
+<circle cx = "100", cy = "90", r = "20", class="draggable", fill = "rgb(255,204,0)", id="thecircle2", onmousedown="thisIsDragged(this)"/>
+<circle cx = "150", cy="90", r="20", class="draggable", fill="rgb(255,204,0)", id="motherofspot", onmousedown="thisIsDragged(this)"/>
+<circle cx = "100", cy="100", r="5", class="draggable", fill=#000000, id="circleyguy", onmousedown="thisIsDragged(this)" />
+<circle cx = "150", cy="100", r="5", class="draggable", fill=#000000, id="circleyguy2", onmousedown="thisIsDragged(this)"/>
+	</svg>
+mouse pos:	<div id="mouseposdiv"></div>
+<div id="mouseupdowndiv"></div>
+<script>		
+		var draggables = document.getElementsByClassName('draggable');
+		for (i = 0; i < draggables.length; i++){
+			draggables[i].setAttribute("transform", "translate(0,0)");
+			draggables[i].addEventListener("mousedown", thisIsDragged(this));
+		}
+</script>
+</body>
+</html>

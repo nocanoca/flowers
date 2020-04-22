@@ -1,0 +1,203 @@
+<html>
+<head>
+    <script type='text/javascript'>
+		var div = document.getElementById('testy');
+		var NS = "http://www.w3.org/2000/svg";
+
+
+
+		function modarg(r, theta){
+			return [Math.round((r*Math.cos(theta))*1000)/1000, Math.round((r*Math.sin(theta))*1000)/1000];
+		}
+		
+		var pi = Math.PI
+		
+		function makecoord(thearray){
+			return thearray[0]+" "+thearray[1];
+		}
+		
+		function makergba(thearray){
+			return "rgba("+thearray[0]+commadiv+thearray[1]+commadiv+thearray[2]+commadiv+thearray[3]+")"
+		}
+		
+//drag and drop functionality
+			
+
+			let mousedown = false;
+			let mousedowninitial = false;
+			let draggedobject = false;
+			var translationvector = false;
+			var initialtranslationvector = [0,0];
+		
+			function getTranslation(ele){
+				console.log(ele);
+				//gets list of all transformations
+				transformslist = ele.transform.baseVal;
+				for (i = 0; i < transformslist.numberOfItems; i++){
+					//if the type of the transformation is a translation, get info
+					if (transformslist.getItem(i).type == 2) {
+						// e and f are the translation coords
+						xtranslate = transformslist.getItem(i).matrix.e;
+						ytranslate = transformslist.getItem(i).matrix.f;
+						}		
+					}	
+					return [xtranslate,ytranslate];
+			
+				}
+		
+			function thisIsDragged(ele){
+				if (draggedobject != ele){
+					console.log("new object");
+					draggedobject = ele;
+					}
+				}
+					
+			function dragEvent(){
+							
+				if (mousedown == true){
+					if (draggedobject){		
+	//				console.log("spoons");
+					//initialtranslationvector = getTranslation(ele);
+				
+					translationvector = [initialtranslationvector[0]+event.clientX-mousedowninitial[0], event.clientY-mousedowninitial[1]+initialtranslationvector[1]];
+					translationcommand = "translate("+translationvector[0]+","+translationvector[1]+")";
+					draggedobject.setAttribute("transform",translationcommand);
+
+						}
+					}
+				}
+					
+				function mouseDownEvent(){
+					mousedown = true;
+					initialtranslationvector = getTranslation(draggedobject);
+					mousedowninitial = [event.clientX, event.clientY]
+						}
+					
+				function mouseUpEvent() {
+					mousedown = false;				
+						}
+						
+//flower stuff
+		
+		var commadiv = " , "
+		
+		function updateReadings(){
+			document.getElementById("nopetalsreading").innerHTML = document.getElementById("nopetalsslider").value*2;
+			document.getElementById("redreading").innerHTML = document.getElementById("redslider").value;
+			document.getElementById("greenreading").innerHTML = document.getElementById("greenslider").value;
+			document.getElementById("bluereading").innerHTML = document.getElementById("blueslider").value;
+
+		}
+		
+		function clearFlower(){
+			var existingpetal = document.getElementById("flowerhead");
+			existingpetal.innerHTML = "";	
+		}
+		
+		function testFlower(){
+			var nopetals = document.getElementById("nopetalsslider").value;
+			var flowercolour = [Number(document.getElementById("redslider").value), Number(document.getElementById("greenslider").value), Number(document.getElementById("blueslider").value), 1];
+			updateReadings();
+			clearFlower();
+			drawFlower(nopetals, flowercolour);
+		}
+		
+		function drawPetal(number, orientation, colour){
+			//number is number of petals to fit around vertex
+			//orientation is the angle the petal's midline is at
+			
+			var flowerhead = document.getElementById("flowerhead");
+			var petal = document.createElementNS(NS, "path");
+			
+			var angle = pi/number;
+			var size = 100;
+			var startkey = modarg(size,orientation+angle);
+			var endkey = modarg(size,orientation-angle);			
+			var start = [75,75];
+			
+			dstring = "M "+makecoord(start)+" c "+ makecoord(startkey) + commadiv +  makecoord(endkey)+commadiv+ "0 0";
+			petal.setAttribute("d", dstring);
+			petal.setAttribute("style", "fill:"+colour);
+			petal.setAttribute("id", "petal");
+			flowerhead.appendChild(petal);
+		}
+		
+		var i = 0;
+		
+		//position of centre
+		var stamenpos = [75,75];
+		
+		//radius of centre
+		var stamenrad = 20;
+		
+		//number of petals
+		var nopetals = 8;
+		
+		//radius of petal
+		var petalrad = 10;
+		
+		//base colour
+		var basecolour = [255,102,204,0.95];
+		
+		
+		//deviation of petals from the norm allowed
+		var deviation = 50;
+		
+		function drawFlower(nopetals, flowercolour){
+
+			
+			var flowerhead = document.getElementById("flowerhead");
+			
+			for (i=0; i<nopetals*2; i++){
+				orientation = 2*pi*i/(nopetals*2);
+				
+				colourvariance = [Math.floor(Math.random()*deviation), Math.floor(Math.random()*deviation), Math.floor(Math.random()*deviation), 0];
+				arraypetalcolour = [flowercolour[0]+colourvariance[0], flowercolour[1]+colourvariance[1], flowercolour[2]+colourvariance[2], flowercolour[3]+colourvariance[3]];
+				
+				petalcolour = makergba(arraypetalcolour);
+				
+				drawPetal(nopetals, orientation, petalcolour);
+				
+				}
+				
+				var stamen = document.createElementNS(NS, "circle");
+				stamen.setAttribute("cx", stamenpos[0]);
+				stamen.setAttribute("cy", stamenpos[1]);
+				stamen.setAttribute("r", stamenrad);
+				stamen.setAttribute("fill", "rgb(255, 204, 0)");
+				stamen.setAttribute("transform", "translate(0,0)");
+				stamen.addEventListener("mousedown", thisIsDragged(this));
+				flowerhead.appendChild(stamen);
+				
+
+			}
+			
+			var draggables = document.getElementsByClassName('draggable');
+			for (i = 0; i < draggables.length; i++){
+				draggables[i].setAttribute("transform", "translate(0,0)");
+				draggables[i].addEventListener("mousedown", thisIsDragged(this));
+			}
+		
+		
+	</script>
+</head>
+<body>
+
+<h1 id="header">Flower moon</h1>
+	<svg width="500" height="300" id="garden" onmousedown="mouseDownEvent()", onmouseup="mouseUpEvent()", onmousemove="dragEvent()", onmouseleave="mouseUpEvent()">
+	<path d="M 10 500 C 20 20, 40 20, 75 75" stroke="#00802b" fill="transparent" stroke-width="10"/>
+
+<svg width="150" height="150" id="flowerhead" style="background-color: #000000">
+</svg>
+</svg>
+<br />
+number of petals: <input type="range" min="3" max="100" value="50" class="slider" id="nopetalsslider" oninput="testFlower(8)"><div id="nopetalsreading"></div>
+colour:<br />
+red:<input type="range" min="0" max="255" value="50" class="slider" id="redslider" oninput="testFlower()"><div id="redreading"></div>
+green:<input type="range" min="0" max="255" value="50" class="slider" id="greenslider" oninput="testFlower()"><div id="greenreading"></div>
+blue:<input type="range" min="0" max="255" value="50" class="slider" id="blueslider" oninput="testFlower()"><div id="bluereading"></div>
+
+<div id="testy">
+</div>
+</body>
+</html>
